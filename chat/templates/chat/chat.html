@@ -1,0 +1,90 @@
+{% load static %}
+<!doctype html>
+<html class="no-js" lang="">
+
+<head>
+  <meta charset="utf-8">
+  <title></title>
+  <meta name="description" content="">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <meta property="og:title" content="">
+  <meta property="og:type" content="">
+  <meta property="og:url" content="">
+  <meta property="og:image" content="">
+
+  <link rel="manifest" href="site.webmanifest">
+  <link rel="apple-touch-icon" href="icon.png">
+  <!-- Place favicon.ico in the root directory -->
+  <link rel="stylesheet" href="{% static 'chat/css/bootstrap.min.css' %}">
+
+  <meta name="theme-color" content="#fafafa">
+</head>
+
+<body>
+
+  <!-- Add your site or application content here -->
+  <h1 class="hstyle">welcome to {{room_name}} </h1>
+
+  <div class="container">
+    <div class="row d-flex justify-content-center">
+      <div class="col-6">
+        <form>
+          <div class="form-group">
+            <label for="exampleFormControlTextarea1" class="h4 pt-5">Let's talk</label>
+            <textarea class="form-control" id="chat-text"  rows="10"></textarea><br>
+          </div>
+          <div class="form-group">
+            <input placeholder='type message' class="form-control" id="input" type="text" size="80"></br>
+          </div>
+          <input class="btn btn-secondary btn-lg btn-block" id="submit" type="button" value="send">
+        </form>
+      </div>
+    </div>
+  </div>
+  {{user}}
+  {{request.user.username}}
+
+
+  
+  
+  
+
+
+
+
+  <!-- Socrates Javascript Websocket setup -->
+
+  {{ room_name|json_script:"room-name" }}
+  {{ request.user.username|json_script:"user_username" }}
+  <script type="text/javascript">
+    const user_username = JSON.parse(document.getElementById('user_username').textContent)
+    const roomName = JSON.parse(document.getElementById('room-name').textContent);
+
+
+
+
+
+
+    document.querySelector('#submit').onclick = function(e){
+      const messageInputDom = document.querySelector('#input');
+      const message = messageInputDom.value;
+      chatSocket.send(JSON.stringify({
+        'message':message,
+        'username':user_username,
+      }))
+      messageInputDom.value = '';
+    };
+    
+
+    const chatSocket = new WebSocket('ws://'+window.location.host+'/ws/chat/'+roomName+'/');
+    
+    chatSocket.onmessage= function(e){
+      const data = JSON.parse(e.data);
+      console.log(data)
+      document.querySelector('#chat-text').value += (data.username+': '+data.message + '\n')
+    }
+  </script>
+</body>
+
+</html>
